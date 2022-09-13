@@ -13,15 +13,43 @@ def my_pretty_print(poly): # красиво переводим полином в
             if i>1: ret += f"^{i}"
     return ret[1:] if (ret[0:1] == "+") else ret  # убираем самый первый + если он есть
 
-def my_parse_poly(s):
-    ret = []
-    s = s.replace("-","+-")
-    if s[0:1] == "+": s = s[1:]
-    ret = s.split("+")
+def my_parse_poly(s):  # Парсим строку в список с коэффициентами полинома на праивльных индексах
+    def get_koeff(s1): # вытаскиваем коэффициент очередного элемента многочлена
+        if s1.find("*")>0: return int(s1.split("*")[0]) # то, что до знака * - то и индекс
+        else:
+            if s1.find("-x") > -1: return -1 # одиночный x обрабатываем отдельно
+            elif s1.find("x") > -1: return 1
+            else: return int(s1) # последний элемент моногочлена (который без x)
 
-    print(s)
+    def get_pow(s1): # вытаскиваем степень очередного элемента многочлена
+        if s1.find("x")>-1: # не последний элемент многочлена
+            if s1.find("^")>-1: # одинокий x - без знака ^
+                return int(s1.split("^")[1]) # не 0-й и не 1-й элементы многочлена
+            else: return 1
+        else: return 0
+
+    # многочлен на элементы будем делить, опираясь на символ "+"
+    s = s.replace("-","+-") # поэтому к минусам добавим +
+    if s[0:1] == "+": s = s[1:] # у самого первого элемента + будет лишним
+    work = s.split("+") # разделим - плюсы уйдут, а минусы - встанут на свои места
+    ret = []
+    while len(work)>0:
+        curr = work.pop(0) # обрабатываем очередной элемент
+        if len(ret) == 0: # первая итерация цикла - заполняем список нулями,
+                          # определяя его правильную длину
+            ret=[0 for i in range(0,get_pow(curr)+1)]
+        ret[get_pow(curr)] = get_koeff(curr) # сохраняем нужный коэффициент на нужной позиции
     return ret
 
+def my_polynom_add(p1,p2): # сложение двух полиномов
+    # нормализуем полиномы, чтобы они были одинаковой длины
+    if len(p1)>len(p2): tmp = p2
+    else: tmp = p1
+    while len(tmp)!=max(len(p1),len(p2)):
+        tmp.append(0) # тут будет изменяться или p1 или p2 !!!
+    return [p1[i]+p2[i] for i in range(len(p1))] # тут просто складываем коэффициенты
+
+######### Сама программа ##########
 with open("task05_1.txt","r") as f:
     str1 = f.read()
 
@@ -31,9 +59,13 @@ with open("task05_2.txt","r") as f:
 print("Прочитано из файлов:")
 print(str1)
 print(str2)
-print()
-poly1 =my_parse_poly(str1)
-#poly2 =my_parse_poly(str2)
-# print("Коэффициенты полиномов:")
-print(poly1)
-#print(poly2)
+
+print("\nСумма полиномов:")
+print(
+    my_pretty_print(
+        my_polynom_add(
+            my_parse_poly(str1),
+            my_parse_poly(str2)
+        )
+    )
+)

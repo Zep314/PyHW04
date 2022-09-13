@@ -23,7 +23,10 @@ k = 5
 #seed(4)
 polynom = [randint(-9,10) for _ in range(k+1)]
 
+# Коэффициенты
 print(polynom)
+# Сам многочлен
 print(my_pretty_print(polynom))
+
 with open("task04.txt","w") as f:
     f.write(my_pretty_print(polynom))
